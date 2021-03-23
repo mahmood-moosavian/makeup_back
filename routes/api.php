@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\V1\Auth\ConfirmCodeController;
 use App\Http\Controllers\API\V1\Auth\EnterMobileController;
 use App\Http\Controllers\API\V1\Auth\ForgotPasswordController;
 use App\Http\Controllers\API\V1\Auth\LogoutController;
@@ -26,22 +27,8 @@ Route::prefix('v1')->group(function () {
      * Auth
      */
     Route::post('logout', [LogoutController::class, 'logout']);
-    Route::post('entermobile', [EnterMobileController::class, 'getMobile'])->middleware('throttle:smsattemp');
-    Route::post('confirmCode', [ConFirmCodeController::class, 'confirmCode'])->middleware('throttle:smsattemp');
-
-    Route::post('register', [RegisterController::class, 'register']);
-
-    Route::get('verify-email/{id}/{hash}', [VerificationController::class, 'verify'])
-    ->name('verification.verify');
-
-    Route::post('verify-email/resend', [VerificationController::class, 'resend'])
-    ->name('verification.resend');
-
-    Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
-    ->name('password.email');
-
-    Route::post('reset-password', [ResetPasswordController::class, 'reset'])
-    ->name('password.reset');
+    Route::post('entermobile', [EnterMobileController::class, 'getMobile']);//->middleware('throttle:smsattemp');
+    Route::post('confirmCode', [ConfirmCodeController::class, 'confirmCode']);//->middleware('throttle:smsattemp');
 
     /*
      * User

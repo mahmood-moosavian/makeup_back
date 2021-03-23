@@ -19,7 +19,7 @@ class SmsController extends Controller
     public function send($receptor, $message, $token, $template){
         try {
             $sms = new KavenegarApi($this->api_key);
-            return $sms->send($this->sender, $receptor, $message);
+            // return $sms->send($this->sender, $receptor, $message); //تست
 
             // return $sms->VerifyLookup($receptor, $token, null, null, $template, null);
 
@@ -27,6 +27,6 @@ class SmsController extends Controller
         } catch (\Throwable $th) {
             report($th);
         }
-        
+
     }
 }

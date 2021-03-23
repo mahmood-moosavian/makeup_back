@@ -7,30 +7,55 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Rules\MobileValidation;
 use App\Rules\VerifyCodeValidation;
-use Laravel\Passport\Http\Controllers\AccessTokenController;
-use Psr\Http\Message\ServerRequestInterface;
+use Illuminate\Support\Facades\Route;
 
-class ConfirmCodeController extends AccessTokenController
+class ConfirmCodeController extends Controller
 {
-    
-    public function confirmCode(ServerRequestInterface $request){
+    public function confirmCode(Request $request){
 
-        dd($request);
-        $request->validate([
-            'mobile' => ['required',new MobileValidation],
-            'active_code' => ['required', new VerifyCodeValidation],
+        if($request->grant_type === "refresh_token"){
+            request()->request->add([
+                'grant_type' => 'refresh_token',
+                'refresh_token' => $request->refresh_token,
+                'client_id' => $request->client_id,
+                'client_secret' => env('PASSPORT_CLIENT_SECRET'),
+            ]);
+
+            $response = Route::dispatch(Request::create('/oauth/token', 'POST'));
+
+            $data = json_decode($response->getContent(), true);
+            if (!$response->isOk()) {
+                return response()->json($data, 400);
+            }
+            return $data;
+        }
+
+        $validated = $request->validate([
+            'username' => ['required',new MobileValidation],
+            'password' => ['required', new VerifyCodeValidation],
         ]);
-        
-        $user = User::where(['mobile'=> $request->mobile, 'active_code'=> $request->active_code])->get();
-        if (isset($user[0])) {
-            // Authentication passed...
-            //return $user->createToken($request->device_name)->plainTextToken;
-            Auth::loginUsingId($user[0]->id);
 
+        $user = User::where(['mobile'=> $request->username, 'active_code'=> $request->password])->get();
+        if (isset($user[0])) {
+            request()->request->add([
+                'grant_type' => 'password',
+                'client_id' => $request->client_id,
+                'client_secret' => env('PASSPORT_CLIENT_SECRET'),
+                'username' => $request->username,
+                'password' => $request->password,
+                'scope' => '',
+            ]);
+
+            $response = Route::dispatch(Request::create('/oauth/token', 'POST'));
+
+            $data = json_decode($response->getContent(), true);
+            if (!$response->isOk()) {
+                return response()->json($data, 400);
+            }
             $user[0]->active_code = null;
+            $user[0]->verified = true;
             $user[0]->save();
-            
-            return response(['mobile'=>$user[0]->mobile],200);
+            return $data;
         }
         $data = [
             'message' =>'کد وارد شده صحیح نیست',
@@ -38,6 +63,6 @@ class ConfirmCodeController extends AccessTokenController
                 'active_code' => ['کد وارد شده صحیح نیست']
             ]
         ];
-        return response($data, 401);
+        return response($data, 422);
     }
 }

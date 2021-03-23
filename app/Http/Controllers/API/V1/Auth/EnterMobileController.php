@@ -23,13 +23,13 @@ class EnterMobileController extends Controller
             'mobile' => ['required',new MobileValidation],
         ]);
         try{
-            $user = User::firstOrCreate(   
+            $user = User::firstOrCreate(
                 ['mobile' => $request->mobile],
             );
 
             event(new AttempLogin($user));
 
-            return response([],201);
+            return response(['success'=>true],201);
 
 
         }catch(Exception $e){
