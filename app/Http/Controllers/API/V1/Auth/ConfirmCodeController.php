@@ -13,6 +13,7 @@ class ConfirmCodeController extends Controller
 {
     public function confirmCode(Request $request){
 
+        //Get Refresh Token
         if($request->grant_type === "refresh_token"){
             request()->request->add([
                 'grant_type' => 'refresh_token',
@@ -34,7 +35,7 @@ class ConfirmCodeController extends Controller
             'username' => ['required',new MobileValidation],
             'password' => ['required', new VerifyCodeValidation],
         ]);
-
+        //Get Token
         $user = User::where(['mobile'=> $request->username, 'active_code'=> $request->password])->get();
         if (isset($user[0])) {
             request()->request->add([
@@ -60,7 +61,7 @@ class ConfirmCodeController extends Controller
         $data = [
             'message' =>'کد وارد شده صحیح نیست',
             'errors' => [
-                'active_code' => ['کد وارد شده صحیح نیست']
+                'password' => ['کد وارد شده صحیح نیست']
             ]
         ];
         return response($data, 422);
