@@ -27,8 +27,8 @@ Route::prefix('v1')->group(function () {
      * Auth
      */
     Route::post('logout', [LogoutController::class, 'logout']);
-    Route::post('entermobile', [EnterMobileController::class, 'getMobile']);//->middleware('throttle:smsattemp');
-    Route::post('confirmCode', [ConfirmCodeController::class, 'confirmCode']);//->middleware('throttle:smsattemp');
+    Route::post('entermobile', [EnterMobileController::class, 'getMobile'])->middleware('throttle:smsattemp');
+    Route::post('confirmCode', [ConfirmCodeController::class, 'confirmCode'])->middleware('throttle:smsattemp');
 
     /*
      * User
